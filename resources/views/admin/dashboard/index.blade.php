@@ -44,67 +44,131 @@
             <p class="text-gray-600">Kelola Sistem Informasi Reservasi Cottage dan Edukasi Wisata Alam Rimba Camp</p>
         </div>
 
-        <!-- Statistik Pengunjung Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Pengunjung Hari Ini -->
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Hari Ini</h3>
-                        <p class="text-3xl font-bold" id="pengunjung-hari-ini">-</p>
-                        <p class="text-blue-100 text-sm">Pengunjung</p>
+        <!-- Management Cards - Dipindah ke atas -->
+        <div class="mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Menu Manajemen</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                <!-- Card Artikel -->
+                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                    <div class="text-center">
+                        <div class="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-newspaper text-blue-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Artikel</h3>
+                        <p class="text-gray-600 text-sm">Kelola konten edukasi</p>
                     </div>
-                    <div class="bg-blue-400 p-3 rounded-full">
-                        <i class="fas fa-eye text-white text-2xl"></i>
+                </a>
+
+                <!-- Card Cottages -->
+                <a href="{{ route('admin.cottages.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                    <div class="text-center">
+                        <div class="bg-green-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-home text-green-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Cottages</h3>
+                        <p class="text-gray-600 text-sm">Kelola data cottage</p>
+                    </div>
+                </a>
+
+                <!-- Card Galeri -->
+                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                    <div class="text-center">
+                        <div class="bg-purple-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-images text-purple-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Galeri</h3>
+                        <p class="text-gray-600 text-sm">Kelola foto wisata</p>
+                    </div>
+                </a>
+
+                <!-- Card Testimoni -->
+                <a href="{{ route('admin.testimoni.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                    <div class="text-center">
+                        <div class="bg-yellow-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-comments text-yellow-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Testimoni</h3>
+                        <p class="text-gray-600 text-sm">Moderasi ulasan</p>
+                    </div>
+                </a>
+
+                <!-- Card Reservasi -->
+                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                    <div class="text-center">
+                        <div class="bg-orange-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-calendar-check text-orange-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Reservasi</h3>
+                        <p class="text-gray-600 text-sm">Kelola pemesanan</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistik Pengunjung -->
+        <div class="mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Statistik Pengunjung</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Pengunjung Hari Ini -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Hari Ini</h3>
+                            <p class="text-3xl font-bold" id="pengunjung-hari-ini">-</p>
+                            <p class="text-blue-100 text-sm">Pengunjung</p>
+                        </div>
+                        <div class="bg-blue-400 p-3 rounded-full">
+                            <i class="fas fa-eye text-white text-2xl"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Pengunjung Minggu Ini -->
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Minggu Ini</h3>
-                        <p class="text-3xl font-bold" id="pengunjung-minggu-ini">-</p>
-                        <p class="text-green-100 text-sm">Pengunjung</p>
-                    </div>
-                    <div class="bg-green-400 p-3 rounded-full">
-                        <i class="fas fa-calendar-week text-white text-2xl"></i>
+                <!-- Pengunjung Minggu Ini -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Minggu Ini</h3>
+                            <p class="text-3xl font-bold" id="pengunjung-minggu-ini">-</p>
+                            <p class="text-green-100 text-sm">Pengunjung</p>
+                        </div>
+                        <div class="bg-green-400 p-3 rounded-full">
+                            <i class="fas fa-calendar-week text-white text-2xl"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Pengunjung Bulan Ini -->
-            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Bulan Ini</h3>
-                        <p class="text-3xl font-bold" id="pengunjung-bulan-ini">-</p>
-                        <p class="text-purple-100 text-sm">Pengunjung</p>
-                    </div>
-                    <div class="bg-purple-400 p-3 rounded-full">
-                        <i class="fas fa-calendar-alt text-white text-2xl"></i>
+                <!-- Pengunjung Bulan Ini -->
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Bulan Ini</h3>
+                            <p class="text-3xl font-bold" id="pengunjung-bulan-ini">-</p>
+                            <p class="text-purple-100 text-sm">Pengunjung</p>
+                        </div>
+                        <div class="bg-purple-400 p-3 rounded-full">
+                            <i class="fas fa-calendar-alt text-white text-2xl"></i>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Total Pengunjung -->
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Total</h3>
-                        <p class="text-3xl font-bold" id="total-pengunjung">-</p>
-                        <p class="text-orange-100 text-sm">Pengunjung</p>
-                    </div>
-                    <div class="bg-orange-400 p-3 rounded-full">
-                        <i class="fas fa-users text-white text-2xl"></i>
+                <!-- Total Pengunjung -->
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">Total</h3>
+                            <p class="text-3xl font-bold" id="total-pengunjung">-</p>
+                            <p class="text-orange-100 text-sm">Pengunjung</p>
+                        </div>
+                        <div class="bg-orange-400 p-3 rounded-full">
+                            <i class="fas fa-users text-white text-2xl"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Chart Statistik -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-gray-800">Grafik Pengunjung</h3>
                 <div class="flex space-x-2">
@@ -126,74 +190,7 @@
                 <canvas id="visitorChart" width="400" height="200"></canvas>
             </div>
         </div>
-
-        <!-- Management Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Card Artikel -->
-            <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                <div class="flex items-center">
-                    <div class="bg-blue-100 p-3 rounded-full">
-                        <i class="fas fa-newspaper text-blue-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Artikel</h3>
-                        <p class="text-gray-600">Kelola konten edukasi</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card Cottages -->
-            <a href="{{ route('admin.cottages.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                <div class="flex items-center">
-                    <div class="bg-green-100 p-3 rounded-full">
-                        <i class="fas fa-home text-green-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Cottages</h3>
-                        <p class="text-gray-600">Kelola data cottage</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card Galeri -->
-            <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                <div class="flex items-center">
-                    <div class="bg-purple-100 p-3 rounded-full">
-                        <i class="fas fa-images text-purple-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Galeri</h3>
-                        <p class="text-gray-600">Kelola foto wisata</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card Testimoni -->
-            <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                <div class="flex items-center">
-                    <div class="bg-yellow-100 p-3 rounded-full">
-                        <i class="fas fa-comments text-yellow-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Testimoni</h3>
-                        <p class="text-gray-600">Moderasi ulasan</p>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card Reservasi -->
-            <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-200">
-                <div class="flex items-center">
-                    <div class="bg-orange-100 p-3 rounded-full">
-                        <i class="fas fa-calendar-check text-orange-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Reservasi</h3>
-                        <p class="text-gray-600">Kelola pemesanan</p>
-                    </div>
-                </div>
-            </a>
-        </div>
+    </div>
 
     <!-- CSS untuk styling filter buttons -->
     <style>

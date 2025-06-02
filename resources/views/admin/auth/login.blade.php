@@ -93,7 +93,7 @@
                         name="email"
                         value="{{ old('email') }}"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-green-200/50 focus:border-green-500 transition-all duration-400 bg-gradient-to-r from-gray-50 to-white hover:from-white hover:to-gray-50 hover:border-gray-300 text-base font-medium placeholder-gray-400 shadow-inner @error('email') border-red-400 bg-gradient-to-r from-red-50 to-pink-50 @enderror"
-                        placeholder="admin@rimbacamp.com"
+                        placeholder="Masukkan Email Anda"
                         required
                     >
                     <div class="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -120,7 +120,7 @@
                         id="password"
                         name="password"
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-3 focus:ring-green-200/50 focus:border-green-500 transition-all duration-400 bg-gradient-to-r from-gray-50 to-white hover:from-white hover:to-gray-50 hover:border-gray-300 text-base font-medium placeholder-gray-400 shadow-inner @error('password') border-red-400 bg-gradient-to-r from-red-50 to-pink-50 @enderror"
-                        placeholder="Masukkan password Anda"
+                        placeholder="Masukkan Password Anda"
                         required
                     >
                     <button

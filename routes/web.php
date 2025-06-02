@@ -35,5 +35,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/cottages/{cottage}/availability', [CottageController::class, 'checkAvailability'])->name('cottages.availability');
         Route::get('/cottages-statistics', [CottageController::class, 'statistics'])->name('cottages.statistics');
         Route::patch('/cottages/{cottage}/toggle-status', [CottageController::class, 'toggleStatus'])->name('cottages.toggle-status');
+
+        // Testimoni routes
+        Route::get('/testimoni', [App\Http\Controllers\Admin\TestimoniController::class, 'index'])->name('testimoni.index');
+        Route::get('/testimoni/{testimoni}', [App\Http\Controllers\Admin\TestimoniController::class, 'show'])->name('testimoni.show');
+        Route::patch('/testimoni/{testimoni}/status', [App\Http\Controllers\Admin\TestimoniController::class, 'updateStatus'])->name('testimoni.updateStatus');
+        Route::get('/api/testimoni/stats', [App\Http\Controllers\Admin\TestimoniController::class, 'getStats'])->name('testimoni.stats');
+
     });
 });

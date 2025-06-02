@@ -40,4 +40,7 @@ class User extends Authenticatable
         return $this->role === 'pengunjung';
     }
 
+    public function testimonis() {
+        return $this->hasMany(Testimoni::class);
+    }
 }
