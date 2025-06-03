@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Dashboard Admin - Rimba Camp')
+
 @section('body-class', 'bg-gray-100')
 
 @section('content')
@@ -49,7 +50,7 @@
             <h3 class="text-xl font-bold text-gray-800 mb-4">Menu Manajemen</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                 <!-- Card Artikel -->
-                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                <a href="{{ route('admin.artikel.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
                     <div class="text-center">
                         <div class="bg-blue-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                             <i class="fas fa-newspaper text-blue-600 text-2xl"></i>

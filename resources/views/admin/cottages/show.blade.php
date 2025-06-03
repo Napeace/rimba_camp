@@ -40,9 +40,6 @@
                     <p class="text-gray-600">Informasi lengkap cottage dan riwayat reservasi</p>
                 </div>
                 <div class="flex space-x-3">
-                    <a href="{{ route('admin.cottages.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Kembali
-                    </a>
                     <a href="{{ route('admin.cottages.edit', $cottage) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition duration-200">
                         <i class="fas fa-edit mr-2"></i>Edit Cottage
                     </a>

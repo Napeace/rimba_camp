@@ -42,5 +42,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/testimoni/{testimoni}/status', [App\Http\Controllers\Admin\TestimoniController::class, 'updateStatus'])->name('testimoni.updateStatus');
         Route::get('/api/testimoni/stats', [App\Http\Controllers\Admin\TestimoniController::class, 'getStats'])->name('testimoni.stats');
 
+        //Artikel routes
+        Route::resource('artikel', App\Http\Controllers\Admin\ArtikelController::class);
     });
 });
