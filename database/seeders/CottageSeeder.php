@@ -13,8 +13,6 @@ class CottageSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('cottages')->truncate(); // Kosongkan tabel cottages
-
         $cottages = [
             [
                 'nomor' => 'C001',
