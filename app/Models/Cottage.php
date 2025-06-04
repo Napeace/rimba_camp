@@ -22,16 +22,16 @@ class Cottage extends Model
         'harga_per_malam' => 'integer',
     ];
 
-    // Relationship dengan reservasi - menggunakan nama model yang benar
+    // PERBAIKAN: Relationship dengan reservasi - menggunakan foreign key yang benar
     public function reservations()
     {
-        return $this->hasMany(Reservasi::class, 'cottages_id', 'id');
+        return $this->hasMany(Reservasi::class, 'cottage_id', 'id');
     }
 
-    // Alternatif: bisa juga menggunakan nama yang lebih konsisten
+    // Alias untuk konsistensi
     public function reservasi()
     {
-        return $this->hasMany(Reservasi::class, 'cottages_id', 'id');
+        return $this->hasMany(Reservasi::class, 'cottage_id', 'id');
     }
 
     // Accessor untuk format harga
@@ -54,13 +54,12 @@ class Cottage extends Model
             : '<span class="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">Nonaktif</span>';
     }
 
-    // Scope untuk filter berdasarkan kapasitas
+    // Scopes
     public function scopeByCapacity($query, $capacity)
     {
         return $query->where('kapasitas', '>=', $capacity);
     }
 
-    // Scope untuk filter berdasarkan harga
     public function scopeByPriceRange($query, $min = null, $max = null)
     {
         if ($min !== null) {
@@ -72,7 +71,6 @@ class Cottage extends Model
         return $query;
     }
 
-    // Scope untuk filter berdasarkan status
     public function scopeActive($query)
     {
         return $query->where('status', 'aktif');
@@ -86,7 +84,6 @@ class Cottage extends Model
     // Method untuk cek ketersediaan cottage
     public function isAvailable($checkin, $checkout)
     {
-        // Cottage harus aktif dan tidak ada reservasi yang bertabrakan
         if ($this->status !== 'aktif') {
             return false;
         }
@@ -104,11 +101,10 @@ class Cottage extends Model
                       ->where('tanggal_checkout', '<=', $checkout);
                 });
             })
-            ->whereIn('status_reservasi', ['confirmed', 'checked_in'])
+            ->where('status_reservasi', 'disetujui') // PERBAIKAN: Status sesuai migration
             ->exists();
     }
 
-    // Method untuk toggle status
     public function toggleStatus()
     {
         $this->update([

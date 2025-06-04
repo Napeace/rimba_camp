@@ -10,14 +10,18 @@ class Reservasi extends Model
 {
     use HasFactory;
 
+    // PERBAIKAN: Status constants sesuai dengan migration
+    const STATUS_MENUNGGU = 'menunggu_konfirmasi';
+    const STATUS_DISETUJUI = 'disetujui';
+    const STATUS_DITOLAK = 'ditolak';
+
     protected $fillable = [
         'tanggal_checkin',
         'tanggal_checkout',
         'status_reservasi',
         'bukti_pembayaran',
-        'users_email',
-        'reservasis_id',
-        'cottages_id',
+        'user_id',        // PERBAIKAN: Sesuai migration
+        'cottage_id',     // PERBAIKAN: Sesuai migration
     ];
 
     protected $casts = [
@@ -25,29 +29,19 @@ class Reservasi extends Model
         'tanggal_checkout' => 'date',
     ];
 
-    // Relationships
+    // PERBAIKAN: Relationships - Konsisten dengan migration
     public function user()
     {
-        return $this->belongsTo(User::class, 'users_email', 'email');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function cottage()
     {
-        return $this->belongsTo(Cottage::class, 'cottages_id', 'id');
-    }
-
-    public function parentReservasi()
-    {
-        return $this->belongsTo(Reservasi::class, 'reservasis_id', 'id');
-    }
-
-    public function childReservasis()
-    {
-        return $this->hasMany(Reservasi::class, 'reservasis_id', 'id');
+        return $this->belongsTo(Cottage::class, 'cottage_id', 'id');
     }
 
     // Accessors
-    public function getDurationAttribute()
+    public function getDurasiMenginapAttribute()
     {
         return $this->tanggal_checkin->diffInDays($this->tanggal_checkout);
     }
@@ -55,7 +49,7 @@ class Reservasi extends Model
     public function getTotalHargaAttribute()
     {
         if ($this->cottage) {
-            return $this->duration * $this->cottage->harga_per_malam;
+            return $this->durasi_menginap * $this->cottage->harga_per_malam;
         }
         return 0;
     }
@@ -65,76 +59,75 @@ class Reservasi extends Model
         return 'Rp ' . number_format($this->total_harga, 0, ',', '.');
     }
 
+    public function getStatusLabelAttribute()
+    {
+        $labels = self::getStatusList();
+        return $labels[$this->status_reservasi] ?? 'Unknown';
+    }
+
+    public function getStatusBadgeClassAttribute()
+    {
+        $classes = [
+            self::STATUS_MENUNGGU => 'bg-yellow-100 text-yellow-800',
+            self::STATUS_DISETUJUI => 'bg-green-100 text-green-800',
+            self::STATUS_DITOLAK => 'bg-red-100 text-red-800',
+        ];
+
+        return $classes[$this->status_reservasi] ?? 'bg-gray-100 text-gray-800';
+    }
+
+    // PERBAIKAN: Static methods - Status sesuai migration
+    public static function getStatusList()
+    {
+        return [
+            self::STATUS_MENUNGGU => 'Menunggu Konfirmasi',
+            self::STATUS_DISETUJUI => 'Disetujui',
+            self::STATUS_DITOLAK => 'Ditolak',
+        ];
+    }
+
     // Scopes
     public function scopeByStatus($query, $status)
     {
         return $query->where('status_reservasi', $status);
     }
 
+    public function scopeSearch($query, $search)
+    {
+        return $query->whereHas('user', function ($q) use ($search) {
+            $q->where('name', 'LIKE', '%' . $search . '%')
+              ->orWhere('email', 'LIKE', '%' . $search . '%');
+        });
+    }
+
     public function scopeActive($query)
     {
-        return $query->whereIn('status_reservasi', ['confirmed', 'checked_in']);
+        return $query->where('status_reservasi', self::STATUS_DISETUJUI);
     }
 
     public function scopePending($query)
     {
-        return $query->where('status_reservasi', 'pending');
-    }
-
-    public function scopeCompleted($query)
-    {
-        return $query->where('status_reservasi', 'completed');
+        return $query->where('status_reservasi', self::STATUS_MENUNGGU);
     }
 
     public function scopeCancelled($query)
     {
-        return $query->where('status_reservasi', 'cancelled');
-    }
-
-    public function scopeToday($query)
-    {
-        return $query->whereDate('tanggal_checkin', Carbon::today());
-    }
-
-    public function scopeCheckoutToday($query)
-    {
-        return $query->whereDate('tanggal_checkout', Carbon::today());
-    }
-
-    public function scopeByDateRange($query, $start, $end)
-    {
-        return $query->whereBetween('tanggal_checkin', [$start, $end]);
+        return $query->where('status_reservasi', self::STATUS_DITOLAK);
     }
 
     // Helper methods
     public function isActive()
     {
-        return in_array($this->status_reservasi, ['confirmed', 'checked_in']);
+        return $this->status_reservasi === self::STATUS_DISETUJUI;
     }
 
     public function isPending()
     {
-        return $this->status_reservasi === 'pending';
-    }
-
-    public function isCompleted()
-    {
-        return $this->status_reservasi === 'completed';
+        return $this->status_reservasi === self::STATUS_MENUNGGU;
     }
 
     public function isCancelled()
     {
-        return $this->status_reservasi === 'cancelled';
-    }
-
-    public function isExpired()
-    {
-        return $this->tanggal_checkout < Carbon::now() && !$this->isCompleted();
-    }
-
-    public function canCancel()
-    {
-        return in_array($this->status_reservasi, ['pending', 'confirmed']) &&
-               $this->tanggal_checkin > Carbon::now();
+        return $this->status_reservasi === self::STATUS_DITOLAK;
     }
 }

@@ -26,8 +26,6 @@ class GaleriSeeder extends Seeder
                 'email_verified_at' => now(),
             ]);
         }
-        
-        Galeri::query()->delete();
 
         $galeriData = [
             [

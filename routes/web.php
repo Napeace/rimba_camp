@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\StatistikController;
-use App\Http\Controllers\Admin\CottageController; // Tambahkan ini
+use App\Http\Controllers\Admin\CottageController;
+use App\Http\Controllers\Admin\ReservasiController;
+use App\Http\Controllers\Admin\TestimoniController;
+use App\Http\Controllers\Admin\ArtikelController;
+use App\Http\Controllers\Admin\GaleriController;
 
 // Route untuk halaman utama
 Route::get('/', function () {
@@ -37,15 +41,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/cottages/{cottage}/toggle-status', [CottageController::class, 'toggleStatus'])->name('cottages.toggle-status');
 
         // Testimoni routes
-        Route::get('/testimoni', [App\Http\Controllers\Admin\TestimoniController::class, 'index'])->name('testimoni.index');
-        Route::get('/testimoni/{testimoni}', [App\Http\Controllers\Admin\TestimoniController::class, 'show'])->name('testimoni.show');
-        Route::patch('/testimoni/{testimoni}/status', [App\Http\Controllers\Admin\TestimoniController::class, 'updateStatus'])->name('testimoni.updateStatus');
-        Route::get('/api/testimoni/stats', [App\Http\Controllers\Admin\TestimoniController::class, 'getStats'])->name('testimoni.stats');
+        Route::get('/testimoni', [TestimoniController::class, 'index'])->name('testimoni.index');
+        Route::get('/testimoni/{testimoni}', [TestimoniController::class, 'show'])->name('testimoni.show');
+        Route::patch('/testimoni/{testimoni}/status', [TestimoniController::class, 'updateStatus'])->name('testimoni.updateStatus');
+        Route::get('/api/testimoni/stats', [TestimoniController::class, 'getStats'])->name('testimoni.stats');
+
+        // Route Reservasi
+        Route::get('/reservasi', [ReservasiController::class, 'index'])->name('reservasi.index');
+        Route::get('/reservasi/{reservasi}', [ReservasiController::class, 'show'])->name('reservasi.show');
+        Route::patch('/reservasi/{reservasi}/status', [ReservasiController::class, 'updateStatus'])->name('reservasi.updateStatus');
 
         //Artikel routes
-        Route::resource('artikel', App\Http\Controllers\Admin\ArtikelController::class);
+        Route::resource('artikel', ArtikelController::class);
 
         //Galeri routes
-        Route::resource('galeri', App\Http\Controllers\Admin\GaleriController::class);
+        Route::resource('galeri', GaleriController::class);
     });
 });

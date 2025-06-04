@@ -94,7 +94,7 @@
                 </a>
 
                 <!-- Card Reservasi -->
-                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                <a href="{{ route('admin.reservasi.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
                     <div class="text-center">
                         <div class="bg-orange-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                             <i class="fas fa-calendar-check text-orange-600 text-2xl"></i>
