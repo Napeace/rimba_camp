@@ -38,16 +38,26 @@ class StatistikController extends Controller
 
     private function getWeeklyChartData()
     {
-        $sevenDaysAgo = Carbon::now()->subDays(6);
+        // Pastikan hari ini selalu termasuk dengan menggunakan today() sebagai end date
         $today = Carbon::today();
+        $sevenDaysAgo = $today->copy()->subDays(6); // 6 hari yang lalu + hari ini = 7 hari total
 
         $data = [];
         $labels = [];
 
+        // Loop dari 6 hari yang lalu sampai hari ini (inclusive)
         for ($date = $sevenDaysAgo->copy(); $date->lte($today); $date->addDay()) {
-            $statistik = Statistik::whereDate('tanggal', $date)->first();
+            $statistik = Statistik::whereDate('tanggal', $date->format('Y-m-d'))->first();
 
-            $labels[] = $date->format('d M');
+            // Format label untuk 7 hari
+            if ($date->isToday()) {
+                $labels[] = 'Hari Ini';
+            } elseif ($date->isYesterday()) {
+                $labels[] = 'Kemarin';
+            } else {
+                $labels[] = $date->format('d M');
+            }
+
             $data[] = $statistik ? $statistik->jumlah_pengunjung : 0;
         }
 
@@ -59,20 +69,25 @@ class StatistikController extends Controller
 
     private function getMonthlyChartData()
     {
-        $thirtyDaysAgo = Carbon::now()->subDays(29);
+        // Pastikan hari ini selalu termasuk
         $today = Carbon::today();
+        $thirtyDaysAgo = $today->copy()->subDays(29); // 29 hari yang lalu + hari ini = 30 hari total
 
         $data = [];
         $labels = [];
 
+        // Loop dari 29 hari yang lalu sampai hari ini (inclusive)
         for ($date = $thirtyDaysAgo->copy(); $date->lte($today); $date->addDay()) {
-            $statistik = Statistik::whereDate('tanggal', $date)->first();
+            $statistik = Statistik::whereDate('tanggal', $date->format('Y-m-d'))->first();
 
-            // Format label berbeda untuk 30 hari (tampilkan tanggal setiap 5 hari)
-            if ($date->day % 5 == 0 || $date->eq($today) || $date->eq($thirtyDaysAgo)) {
-                $labels[] = $date->format('d M');
+            // Format label untuk 30 hari - tampilkan semua tanggal
+            if ($date->isToday()) {
+                $labels[] = 'Hari Ini';
+            } elseif ($date->isYesterday()) {
+                $labels[] = 'Kemarin';
             } else {
-                $labels[] = '';
+                // Tampilkan tanggal dengan format yang ringkas
+                $labels[] = $date->format('d M');
             }
 
             $data[] = $statistik ? $statistik->jumlah_pengunjung : 0;

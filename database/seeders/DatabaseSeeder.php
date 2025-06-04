@@ -12,7 +12,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CottageSeeder::class,
             TestimoniSeeder::class,
-            ArtikelSeeder::class
+            ArtikelSeeder::class,
+            GaleriSeeder::class
         ]);
     }
 }

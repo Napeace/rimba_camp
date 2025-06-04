@@ -72,7 +72,7 @@
                 </a>
 
                 <!-- Card Galeri -->
-                <a href="#" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
+                <a href="{{ route('admin.galeri.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-200 hover:scale-105">
                     <div class="text-center">
                         <div class="bg-purple-100 p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                             <i class="fas fa-images text-purple-600 text-2xl"></i>
@@ -255,14 +255,52 @@
                         borderColor: 'rgb(59, 130, 246)',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         tension: 0.1,
-                        fill: true
+                        fill: true,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: 'rgb(59, 130, 246)',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const label = context.label;
+
+                                    if (value === 0) {
+                                        return `${label}: Tidak ada pengunjung`;
+                                    } else if (value === 1) {
+                                        return `${label}: ${value} pengunjung`;
+                                    } else {
+                                        return `${label}: ${value} pengunjung`;
+                                    }
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -271,7 +309,20 @@
                             ticks: {
                                 stepSize: 1
                             }
+                        },
+                        x: {
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
                         }
+                    },
+                    hover: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    onHover: (event, activeElements) => {
+                        event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
                     }
                 }
             });

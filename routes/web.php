@@ -44,5 +44,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         //Artikel routes
         Route::resource('artikel', App\Http\Controllers\Admin\ArtikelController::class);
+
+        //Galeri routes
+        Route::resource('galeri', App\Http\Controllers\Admin\GaleriController::class);
     });
 });
