@@ -10,7 +10,6 @@ class Reservasi extends Model
 {
     use HasFactory;
 
-    // PERBAIKAN: Status constants sesuai dengan migration
     const STATUS_MENUNGGU = 'menunggu_konfirmasi';
     const STATUS_DISETUJUI = 'disetujui';
     const STATUS_DITOLAK = 'ditolak';
@@ -20,8 +19,11 @@ class Reservasi extends Model
         'tanggal_checkout',
         'status_reservasi',
         'bukti_pembayaran',
-        'user_id',        // PERBAIKAN: Sesuai migration
-        'cottage_id',     // PERBAIKAN: Sesuai migration
+        'user_id',
+        'cottage_id',
+        'jumlah_tamu',
+        'total_harga',
+        'catatan',
     ];
 
     protected $casts = [
@@ -29,7 +31,6 @@ class Reservasi extends Model
         'tanggal_checkout' => 'date',
     ];
 
-    // PERBAIKAN: Relationships - Konsisten dengan migration
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
@@ -76,7 +77,7 @@ class Reservasi extends Model
         return $classes[$this->status_reservasi] ?? 'bg-gray-100 text-gray-800';
     }
 
-    // PERBAIKAN: Static methods - Status sesuai migration
+
     public static function getStatusList()
     {
         return [
@@ -96,7 +97,7 @@ class Reservasi extends Model
     {
         return $query->whereHas('user', function ($q) use ($search) {
             $q->where('name', 'LIKE', '%' . $search . '%')
-              ->orWhere('email', 'LIKE', '%' . $search . '%');
+                ->orWhere('email', 'LIKE', '%' . $search . '%');
         });
     }
 

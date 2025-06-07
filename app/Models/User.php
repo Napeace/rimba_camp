@@ -14,6 +14,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'role',
     ];
@@ -40,7 +41,8 @@ class User extends Authenticatable
         return $this->role === 'pengunjung';
     }
 
-    public function testimonis() {
+    public function testimonis()
+    {
         return $this->hasMany(Testimoni::class);
     }
 }
