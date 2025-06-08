@@ -14,6 +14,7 @@ use App\Http\Controllers\Pengunjung\PengunjungDashboardController;
 use App\Http\Controllers\Pengunjung\PengunjungArtikelController;
 use App\Http\Controllers\Pengunjung\PengunjungGaleriController;
 use App\Http\Controllers\Pengunjung\PengunjungCottageController;
+use App\Http\Controllers\Pengunjung\PengunjungTestimoniController;
 
 
 // ----------------------------
@@ -54,6 +55,11 @@ Route::get('/cottage/reservasi/{id}', [PengunjungCottageController::class, 'show
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [PengunjungDashboardController::class, 'profile'])->name('pengunjung.profile');
     Route::post('/profile', [PengunjungDashboardController::class, 'updateProfile'])->name('pengunjung.profile.update');
+
+    // Testimoni pengunjung
+    Route::get('/testimoni', [PengunjungTestimoniController::class, 'index'])->name('pengunjung.testimoni.index');
+    Route::get('/testimoni/create', [PengunjungTestimoniController::class, 'create'])->name('pengunjung.testimoni.create');
+    Route::post('/testimoni', [PengunjungTestimoniController::class, 'store'])->name('pengunjung.testimoni.store');
 });
 
 // -------------------------

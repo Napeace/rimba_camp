@@ -117,7 +117,7 @@
     @stack('styles')
 </head>
 
-<body class="gradient-bg font-sans antialiased min-h-screen relative overflow-hidden">
+<body class="gradient-bg font-sans antialiased min-h-screen relative overflow-y-auto">
     {{-- Background decoration - Floating Nature Elements --}}
     <div class="absolute inset-0 pointer-events-none">
         <div class="absolute top-10 left-10 w-8 h-8 text-green-300 opacity-30 animate-float">
@@ -149,9 +149,10 @@
     </div>
 
     <main class="relative z-10 min-h-screen flex items-center justify-center">
-        <div class="w-full max-w-md p-6">
+        <div class="w-full px-6 md:max-w-2xl lg:max-w-3xl">
             @yield('content')
         </div>
+
     </main>
 
     <script>

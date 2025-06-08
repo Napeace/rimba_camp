@@ -83,6 +83,11 @@
                                 <i class="fas fa-calendar mr-2 text-green-600"></i>
                                 Reservasi Saya
                             </a>
+                            <a href="{{ route('pengunjung.testimoni.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-150">
+                                <i class="fas fa-message mr-2 text-green-600"></i>
+                                Testimoni
+                            </a>
                             <div class="border-t border-green-100"></div>
                             <form method="POST" action="{{ route('pengunjung.logout') }}">
                                 @csrf

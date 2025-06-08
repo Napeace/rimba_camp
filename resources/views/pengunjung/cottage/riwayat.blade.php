@@ -54,11 +54,13 @@
                 {{ $reservasi->links() }}
             </div>
         @else
-            <p class="text-gray-600">Anda belum memiliki riwayat reservasi cottage.</p>
-            <a href="{{ route('cottage.index') }}"
-                class="inline-block mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                Pesan Cottage Sekarang
-            </a>
+            <div class="text-center mt-8">
+                <p class="text-gray-600">Anda belum memiliki riwayat reservasi cottage.</p>
+                <a href="{{ route('cottage.index') }}"
+                    class="inline-block mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    Pesan Cottage Sekarang
+                </a>
+            </div>
         @endif
     </div>
 @endsection
