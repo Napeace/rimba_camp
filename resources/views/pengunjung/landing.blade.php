@@ -405,6 +405,25 @@
         </div>
     </section>
 
+    {{-- Location Section --}}
+    <section id="location" class="py-20 relative"
+        style="background-image: url('/storage/images/location-bg.png'); background-size: cover; background-position: center;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 animate-on-scroll bg-white bg-opacity-70 p-10 rounded-xl shadow-lg">
+                <h2 class="text-4xl font-bold text-green-900 mb-4">Lokasi RimbaCamp</h2>
+                <p class="text-xl text-green-700 max-w-3xl mx-auto leading-relaxed">
+                    Temukan lokasi RimbaCamp kami yang asri dan mudah diakses. Klik link di bawah ini untuk melihat lokasi
+                    secara langsung di Google Maps.
+                </p>
+                <div class="w-24 h-1 bg-gradient-to-r from-emerald-500 to-green-600 mx-auto mt-6 rounded-full"></div>
+                <a href="https://maps.app.goo.gl/tYxpiNdahiSqqDxQ8" target="_blank" rel="noopener noreferrer"
+                    class="inline-block mt-8 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 shadow-xl">
+                    Lihat di Google Maps
+                </a>
+            </div>
+        </div>
+    </section>
+
     {{-- Testimonials Section --}}
     <section class="py-20 bg-gradient-to-br from-lime-100 via-green-100 to-emerald-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
