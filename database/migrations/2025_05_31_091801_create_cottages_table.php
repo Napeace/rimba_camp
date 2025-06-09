@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('kapasitas');
             $table->text('fasilitas');
             $table->integer('harga_per_malam');
-            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif')->after('harga_per_malam');
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

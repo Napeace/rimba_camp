@@ -10,11 +10,13 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        User::create([
-            'name' => 'Admin Rimba Camp',
-            'email' => 'admin@rimbacamp.com',
-            'password' => Hash::make('rimbacamp123'),
-            'role' => 'admin',
-        ]);
+        User::create(
+            [
+                'name' => 'Admin Rimba Camp',
+                'email' => 'admin@rimbacamp.com',
+                'password' => Hash::make('rimbacamp123'),
+                'role' => 'admin',
+            ]
+        );
     }
 }

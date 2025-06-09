@@ -48,7 +48,7 @@ class AuthController extends Controller
             // Cek apakah user adalah admin
             if ($user->isAdmin()) {
                 $request->session()->regenerate();
-                return redirect()->intended(route('admin.dashboard'))
+                return redirect()->route('admin.dashboard')
                     ->with('success', 'Selamat datang, ' . $user->name);
             } else {
                 // Jika bukan admin, logout dan redirect kembali
@@ -72,7 +72,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login')
+        return redirect()->route('pengunjung.landing')
             ->with('success', 'Berhasil logout');
     }
 }
