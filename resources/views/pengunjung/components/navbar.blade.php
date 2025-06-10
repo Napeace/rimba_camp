@@ -149,17 +149,17 @@
                 <i class="fas fa-campground mr-2"></i>
                 Cottage
             </a>
-            <a href="#gallery"
+            <a href="{{ route('galeri.index') }}"
                 class="text-green-700 hover:bg-green-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200">
                 <i class="fas fa-images mr-2"></i>
                 Galeri
             </a>
-            <a href="#articles"
+            <a href="{{ route('artikel.index') }}"
                 class="text-green-700 hover:bg-green-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200">
                 <i class="fas fa-newspaper mr-2"></i>
                 Artikel
             </a>
-            <a href="#contact"
+            <a href="#footer"
                 class="text-green-700 hover:bg-green-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-all duration-200">
                 <i class="fas fa-envelope mr-2"></i>
                 Kontak
