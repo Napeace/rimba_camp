@@ -20,7 +20,14 @@ class PengunjungAuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::guard('web')->attempt($credentials)) {
+            $user = Auth::guard('web')->user();
+            if ($user->isAdmin()) {
+                Auth::guard('web')->logout();
+                return redirect()->back()->withErrors([
+                    'email' => 'Admin tidak dapat login melalui form pengunjung.',
+                ]);
+            }
             return redirect()->route('pengunjung.dashboard');
         }
 
@@ -43,6 +50,13 @@ class PengunjungAuthController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
+        // Logout admin guard if logged in
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -51,14 +65,14 @@ class PengunjungAuthController extends Controller
             'role' => 'pengunjung',
         ]);
 
-        Auth::login($user);
+        Auth::guard('web')->login($user);
 
         return redirect()->route('pengunjung.dashboard');
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
