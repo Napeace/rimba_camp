@@ -109,7 +109,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-lg font-semibold">Total Reservasi</h3>
-                                <p class="text-3xl font-bold">{{ $cottage->reservations->count() }}</p>
+                                <p class="text-3xl font-bold">{{ $cottage->reservasi->count() }}</p>
                             </div>
                             <div class="bg-blue-400 p-3 rounded-full">
                                 <i class="fas fa-calendar-check text-white text-2xl"></i>
@@ -121,7 +121,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-lg font-semibold">Reservasi Aktif</h3>
-                                <p class="text-3xl font-bold">{{ $cottage->reservations->where('status_reservasi', 'confirmed')->count() }}</p>
+                                <p class="text-3xl font-bold">{{ $cottage->reservasi->where('status_reservasi', 'confirmed')->count() }}</p>
                             </div>
                             <div class="bg-green-400 p-3 rounded-full">
                                 <i class="fas fa-check-circle text-white text-2xl"></i>
@@ -134,7 +134,7 @@
                             <div>
                                 <h3 class="text-lg font-semibold">Total Pendapatan</h3>
                                 <p class="text-xl font-bold">
-                                    Rp {{ number_format($cottage->reservations->where('status_reservasi', 'completed')->sum('total_harga'), 0, ',', '.') }}
+                                    Rp {{ number_format($cottage->reservasi->where('status_reservasi', 'completed')->sum('total_harga'), 0, ',', '.') }}
                                 </p>
                             </div>
                             <div class="bg-purple-400 p-3 rounded-full">
@@ -175,7 +175,7 @@
             </div>
         </div>
 
-        <!-- Recent Reservations -->
+        <!-- Recent reservasi -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
             <div class="p-6 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-800 flex items-center">
@@ -184,7 +184,7 @@
                 </h3>
             </div>
 
-            @if($cottage->reservations->count() > 0)
+            @if($cottage->reservasi->count() > 0)
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -199,7 +199,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($cottage->reservations as $reservation)
+                        @foreach($cottage->reservasi as $reservation)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">

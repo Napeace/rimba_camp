@@ -356,7 +356,7 @@
         from { opacity: 0; }
         to { opacity: 1; }
     }
-    
+
     @keyframes slideInUp {
         from {
             opacity: 0;
@@ -367,7 +367,7 @@
             transform: translateY(0);
         }
     }
-    
+
     @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.1); }

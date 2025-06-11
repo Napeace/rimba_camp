@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // -------------------------
-// ROUTE ADMIN (DASHBOARD)
+// ROUTE ADMIN
 // -------------------------
 Route::prefix('admin')->name('admin.')->group(function () {
 
