@@ -96,25 +96,11 @@
                     </div>
                 @else
                     <div class="flex items-center space-x-3">
-                        <div x-data="{ open: false }" class="relative">
-                            <button @click="open = !open"
-                                class="text-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-green-600 flex items-center space-x-1">
-                                <i class="fas fa-sign-in-alt mr-1"></i>
-                                <span>Masuk</span>
-                                <i class="fas fa-chevron-down text-xs"></i>
-                            </button>
-                            <div x-show="open" @click.away="open = false" x-transition
-                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-green-100">
-                                <a href="{{ route('pengunjung.login') }}"
-                                    class="block px-4 py-2 text-sm text-green-700 hover:bg-green-600 hover:text-white transition-colors duration-150">
-                                    Login sebagai Pengunjung
-                                </a>
-                                <a href="{{ route('admin.login') }}"
-                                    class="block px-4 py-2 text-sm text-green-700 hover:bg-green-600 hover:text-white transition-colors duration-150">
-                                    Login sebagai Admin
-                                </a>
-                            </div>
-                        </div>
+                        <a href="{{ route('pengunjung.login') }}"
+                            class="text-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-green-600 flex items-center space-x-1">
+                            <i class="fas fa-sign-in-alt mr-1"></i>
+                            <span>Masuk</span>
+                        </a>
                         <a href="{{ route('pengunjung.register') }}"
                             class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-105 shadow-lg">
                             <i class="fas fa-user-plus mr-1"></i>
