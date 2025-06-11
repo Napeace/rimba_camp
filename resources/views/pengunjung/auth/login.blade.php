@@ -88,7 +88,7 @@
             <div class="mt-8 text-center">
                 <p class="text-green-100 text-sm">
                     Belum punya akun?
-                    <a href="#"
+                    <a href="{{ route('pengunjung.register') }}"
                         class="font-bold text-green-200 hover:text-green-100 transition-all duration-200 underline underline-offset-2">
                         Daftar sekarang
                     </a>

@@ -49,17 +49,23 @@
                             <div
                                 class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
                                 <div class="relative overflow-hidden cursor-pointer"
-                                    onclick="openModal('{{ asset('storage/' . $item->gambar) }}', '{{ $item->judul }}', '{{ $item->deskripsi ?? '' }}')">
-                                    @if ($item->gambar)
-                                        <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->judul }}"
-                                            class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
-                                            loading="lazy">
+                                    onclick="openModal('{{ $item->nama_file ? asset('storage/galeri/' . $item->nama_file) : asset('images/no-image.png') }}', '{{ $item->judul ?? 'Tanpa Judul' }}', '{{ $item->deskripsi ?? '' }}')">
+
+                                    @if ($item->nama_file && file_exists(public_path('storage/galeri/' . $item->nama_file)))
+                                        <img src="{{ asset('storage/galeri/' . $item->nama_file) }}"
+                                             alt="{{ $item->judul ?? 'Galeri Rimbacamp' }}"
+                                             class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+                                             loading="lazy"
+                                             onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
                                     @else
-                                        <div
-                                            class="w-full h-64 bg-gradient-to-br from-blue-400 to-green-500 flex items-center justify-center">
-                                            <i class="fas fa-image text-white text-4xl"></i>
+                                        <div class="w-full h-64 bg-gradient-to-br from-blue-400 to-green-500 flex items-center justify-center">
+                                            <div class="text-center text-white">
+                                                <i class="fas fa-image text-4xl mb-2"></i>
+                                                <p class="text-sm">Gambar tidak tersedia</p>
+                                            </div>
                                         </div>
                                     @endif
+
                                     <div
                                         class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                                         <div
@@ -69,12 +75,11 @@
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
 
                                 <div class="p-4">
                                     <h3 class="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
-                                        {{ $item->judul }}
+                                        {{ $item->judul ?? 'Tanpa Judul' }}
                                     </h3>
 
                                     @if ($item->deskripsi)
@@ -117,6 +122,7 @@
         </div>
     </div>
 
+    <!-- Modal -->
     <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
         <div class="relative max-w-4xl max-h-full">
             <button onclick="closeModal()"
@@ -184,27 +190,41 @@
                 opacity: 0;
                 transform: translateY(50px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-
-        /* Search container styling */
-        .search-container {
-            position: relative;
-        }
-
         .search-btn:hover {
             transform: scale(1.05);
         }
 
-
         .search-input:focus {
             outline: none;
             box-shadow: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
     </style>
 
@@ -220,7 +240,6 @@
                 const searchTerm = searchInput.value.toLowerCase();
 
                 if (searchTerm.trim()) {
-                    // Add search animation
                     searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-lg"></i>';
 
                     setTimeout(() => {
@@ -240,7 +259,6 @@
                         });
                     }, 800);
                 } else {
-                    // Show all items if search is empty
                     galleryItems.forEach(item => {
                         item.style.display = 'block';
                         item.style.animation = 'fadeIn 0.5s ease-out';
@@ -248,17 +266,15 @@
                 }
             }
 
-            // Search button click
             searchBtn.addEventListener('click', performSearch);
 
-            // Enter key press
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     performSearch();
                 }
             });
 
-            // Real-time search (optional)
+            // Real-time search
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
 
@@ -317,12 +333,12 @@
             document.body.style.overflow = 'auto';
         }
 
-        // Like functionality
+        // Like functionality - Simple client-side only
         function likeImage(id) {
             const likesElement = document.getElementById(`likes-${id}`);
             const currentLikes = parseInt(likesElement.textContent);
 
-            // Simple client-side increment (you can implement server-side logic later)
+            // Update langsung di client
             likesElement.textContent = currentLikes + 1;
 
             // Add animation
@@ -330,9 +346,6 @@
             setTimeout(() => {
                 likesElement.parentElement.style.animation = '';
             }, 300);
-
-            // Here you can add AJAX call to update likes in database
-            // fetch(`/galeri/${id}/like`, { method: 'POST' })...
         }
 
         // Close modal when clicking outside
@@ -348,32 +361,5 @@
                 closeModal();
             }
         });
-
-        // Additional animations
-        const style = document.createElement('style');
-        style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
-    }
-    `;
-        document.head.appendChild(style);
     </script>
 @endsection

@@ -37,7 +37,7 @@ class PengunjungTestimoniController extends Controller
         $testimoni = new Testimoni();
         $testimoni->user_id = $user->id;
         $testimoni->isi = $request->isi;
-        $testimoni->status = 'aktif';
+        $testimoni->status = 'nonaktif';
         $testimoni->save();
 
         return redirect()->route('pengunjung.testimoni.index')

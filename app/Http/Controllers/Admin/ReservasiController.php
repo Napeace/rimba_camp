@@ -16,7 +16,7 @@ class ReservasiController extends Controller
      */
     public function index(Request $request): View
     {
-        // PERBAIKAN: Query dengan eager loading yang benar
+        // Query dengan eager loading yang benar
         $query = Reservasi::with(['user', 'cottage'])
             ->orderBy('created_at', 'desc');
 
@@ -25,7 +25,7 @@ class ReservasiController extends Controller
             $query->byStatus($request->status);
         }
 
-        // PERBAIKAN: Filter cottage menggunakan foreign key yang benar
+        // Filter cottage menggunakan foreign key yang benar
         if ($request->filled('cottage_id')) {
             $query->where('cottage_id', $request->cottage_id);
         }
@@ -46,7 +46,7 @@ class ReservasiController extends Controller
 
         $reservasis = $query->paginate(10)->appends($request->all());
 
-        // PERBAIKAN: Statistik dengan status yang benar
+        // Statistik dengan status yang benar
         $statistics = [
             'total' => Reservasi::count(),
             'menunggu_konfirmasi' => Reservasi::where('status_reservasi', Reservasi::STATUS_MENUNGGU)->count(),
@@ -71,7 +71,6 @@ class ReservasiController extends Controller
      */
     public function updateStatus(Request $request, Reservasi $reservasi): JsonResponse
     {
-        // PERBAIKAN: Validasi yang lebih ketat
         try {
             $request->validate([
                 'status' => 'required|string|in:' . implode(',', array_keys(Reservasi::getStatusList())),
@@ -79,11 +78,11 @@ class ReservasiController extends Controller
 
             $oldStatus = $reservasi->status_reservasi;
 
-            // PERBAIKAN: Update dengan method yang lebih aman
+            // Update dengan method yang lebih aman
             $reservasi->status_reservasi = $request->status;
             $reservasi->save();
 
-            // PERBAIKAN: Refresh model untuk mendapatkan data terbaru
+            // Refresh model untuk mendapatkan data terbaru
             $reservasi->refresh();
 
             return response()->json([
@@ -106,7 +105,6 @@ class ReservasiController extends Controller
             ], 422);
 
         } catch (\Exception $e) {
-            // PERBAIKAN: Log error untuk debugging
             \Log::error('Error updating reservation status: ' . $e->getMessage(), [
                 'reservation_id' => $reservasi->id,
                 'requested_status' => $request->status,
@@ -126,8 +124,22 @@ class ReservasiController extends Controller
      */
     public function show(Reservasi $reservasi): JsonResponse
     {
-        // PERBAIKAN: Load relasi dengan benar
         $reservasi->load(['user', 'cottage']);
+
+        // PERBAIKAN: Logika path gambar yang lebih sederhana dan akurat
+        $buktiPembayaranUrl = null;
+        if ($reservasi->bukti_pembayaran) {
+            // Jika sudah berupa URL lengkap (http/https)
+            if (filter_var($reservasi->bukti_pembayaran, FILTER_VALIDATE_URL)) {
+                $buktiPembayaranUrl = $reservasi->bukti_pembayaran;
+            }
+            // Jika path relatif, tambahkan /storage/ di depan
+            else {
+                // Bersihkan path dari slash di awal jika ada
+                $cleanPath = ltrim($reservasi->bukti_pembayaran, '/');
+                $buktiPembayaranUrl = '/storage/' . $cleanPath;
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -136,6 +148,7 @@ class ReservasiController extends Controller
                 'user' => [
                     'name' => $reservasi->user ? $reservasi->user->name : 'User tidak ditemukan',
                     'email' => $reservasi->user ? $reservasi->user->email : 'Email tidak tersedia',
+                    'phone' => $reservasi->user ? $reservasi->user->phone : 'Tidak tersedia',
                 ],
                 'cottage' => $reservasi->cottage ? [
                     'nomor' => $reservasi->cottage->nomor,
@@ -148,13 +161,15 @@ class ReservasiController extends Controller
                     'fasilitas' => '',
                     'harga_per_malam' => 0,
                 ],
-                'tanggal_checkin' => $reservasi->tanggal_checkin->format('d/m/Y'),
-                'tanggal_checkout' => $reservasi->tanggal_checkout->format('d/m/Y'),
+                'tanggal_checkin' => $reservasi->tanggal_checkin->format('Y-m-d'),
+                'tanggal_checkout' => $reservasi->tanggal_checkout->format('Y-m-d'),
                 'durasi_menginap' => $reservasi->durasi_menginap,
                 'status_reservasi' => $reservasi->status_reservasi,
                 'status_label' => $reservasi->status_label,
-                'bukti_pembayaran' => $reservasi->bukti_pembayaran,
-                'created_at' => $reservasi->created_at->format('d/m/Y H:i'),
+                'status_badge_class' => $reservasi->status_badge_class,
+                'bukti_pembayaran' => $buktiPembayaranUrl,
+                'formatted_total' => $reservasi->formatted_total,
+                'created_at' => $reservasi->created_at->format('Y-m-d H:i:s'),
             ]
         ]);
     }

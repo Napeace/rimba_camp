@@ -22,13 +22,11 @@ class Cottage extends Model
         'harga_per_malam' => 'integer',
     ];
 
-    // PERBAIKAN: Relationship dengan reservasi - menggunakan foreign key yang benar
-    public function reservations()
-    {
-        return $this->hasMany(Reservasi::class, 'cottage_id', 'id');
-    }
+    // Default attributes
+    protected $attributes = [
+        'status' => 'aktif',
+    ];
 
-    // Alias untuk konsistensi
     public function reservasi()
     {
         return $this->hasMany(Reservasi::class, 'cottage_id', 'id');

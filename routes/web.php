@@ -71,17 +71,11 @@ Route::get('/dashboard-redirect', function () {
     return redirect()->route('pengunjung.login');
 })->name('dashboard.redirect');
 
-
 // =====================================================
 // ROUTE UNTUK ADMIN
 // =====================================================
-Route::prefix('admin')->name('admin.')->group(function () {
 
-    // ---------- Admin Auth (Guest Only) ----------
-    Route::middleware('guest:admin')->group(function () {
-        Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [AuthController::class, 'login'])->name('login.process');
-    });
+Route::prefix('admin')->name('admin.')->group(function () {
 
     // ---------- Admin Area (Auth Admin) ----------
     Route::middleware(['auth:admin', 'admin'])->group(function () {
