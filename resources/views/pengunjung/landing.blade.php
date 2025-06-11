@@ -253,7 +253,6 @@
         </div>
     </section>
 
-
     {{-- Gallery Section --}}
     <section id="gallery"
         class="py-20 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 relative overflow-hidden">
@@ -278,8 +277,21 @@
                     <div
                         class="group relative overflow-hidden rounded-3xl shadow-2xl hover:shadow-3xl transform hover:scale-105 hover:-rotate-1 transition-all duration-700 ease-out bg-white p-2">
                         <div class="relative overflow-hidden rounded-2xl">
-                            <img src="{{ asset('storage/galeri/' . $galeri->gambar) }}" alt="{{ $galeri->judul }}"
-                                class="h-72 w-full object-cover rounded-2xl brightness-95 group-hover:brightness-110 group-hover:scale-110 transition-all duration-700 ease-out filter group-hover:saturate-110">
+                            @if ($galeri->nama_file && file_exists(public_path('storage/galeri/' . $galeri->nama_file)))
+                                <img src="{{ asset('storage/galeri/' . $galeri->nama_file) }}"
+                                    alt="{{ $galeri->deskripsi ?? 'Galeri RimbaCamp' }}"
+                                    class="h-72 w-full object-cover rounded-2xl brightness-95 group-hover:brightness-110 group-hover:scale-110 transition-all duration-700 ease-out filter group-hover:saturate-110"
+                                    loading="lazy"
+                                    onerror="this.src='{{ asset('images/no-image.png') }}'; this.onerror=null;">
+                            @else
+                                <div class="h-72 w-full bg-gradient-to-br from-emerald-400 to-green-500 rounded-2xl flex items-center justify-center">
+                                    <div class="text-center text-white">
+                                        <i class="fas fa-image text-4xl mb-2"></i>
+                                        <p class="text-sm">Gambar tidak tersedia</p>
+                                    </div>
+                                </div>
+                            @endif
+
                             <div
                                 class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 group-hover:animate-pulse transition-opacity duration-500">
                             </div>
@@ -288,13 +300,9 @@
                             </div>
                             <div
                                 class="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <h3
-                                    class="text-2xl font-bold mb-3 drop-shadow-lg group-hover:text-emerald-300 transition-colors duration-300">
-                                    {{ $galeri->judul }}
-                                </h3>
                                 <p
                                     class="text-sm opacity-90 max-w-xs drop-shadow-md leading-relaxed group-hover:opacity-100 transition-opacity duration-300">
-                                    {{ $galeri->deskripsi }}
+                                    {{ $galeri->deskripsi ?? 'Keindahan alam RimbaCamp yang memukau' }}
                                 </p>
                             </div>
                             <div

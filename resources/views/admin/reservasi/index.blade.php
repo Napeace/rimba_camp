@@ -323,59 +323,230 @@
     function showDetail(id) {
         showLoading();
 
-        fetch(`/admin/reservasi/${id}`)
+        fetch(`/admin/reservasi/${id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
+            // Cek apakah response adalah JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`Server returned ${contentType} instead of JSON. Status: ${response.status}`);
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+
+            if (data.success) {
+                const reservation = data.data;
+                displayReservationDetails(reservation);
+                hideLoading();
+                document.getElementById('detailModal').classList.remove('hidden');
+            } else {
+                hideLoading();
+                alert('Gagal memuat detail reservasi: ' + (data.message || 'Error tidak diketahui'));
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            console.error('Fetch error:', error);
+
+            // Error handling yang lebih spesifik
+            if (error.message.includes('JSON')) {
+                alert('Server mengembalikan response yang tidak valid. Silakan periksa koneksi dan coba lagi.');
+            } else if (error.message.includes('HTTP 404')) {
+                alert('Reservasi tidak ditemukan.');
+            } else if (error.message.includes('HTTP 403')) {
+                alert('Anda tidak memiliki izin untuk mengakses data ini.');
+            } else if (error.message.includes('HTTP 500')) {
+                alert('Terjadi kesalahan pada server. Silakan coba lagi nanti.');
+            } else {
+                alert('Gagal memuat detail reservasi: ' + error.message);
+            }
+        });
+    }
+
+    function displayReservationDetails(reservation) {
+        // Format tanggal untuk tampilan yang lebih baik
+        const formatDate = (dateString) => {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return dateString; // fallback jika format tanggal gagal
+            }
+        };
+
+        // Buat content modal dengan button untuk bukti pembayaran
+        const modalContent = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-3">Informasi Tamu</h4>
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Nama:</strong> ${reservation.user?.name || 'User tidak ditemukan'}</div>
+                        <div><strong>Email:</strong> ${reservation.user?.email || 'Email tidak tersedia'}</div>
+                        <div><strong>No. Telepon:</strong> ${reservation.user?.phone || 'Tidak tersedia'}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-3">Informasi Cottage</h4>
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Nomor:</strong> Cottage ${reservation.cottage?.nomor || 'N/A'}</div>
+                        <div><strong>Kapasitas:</strong> ${reservation.cottage?.kapasitas || 'N/A'} orang</div>
+                        <div><strong>Harga per malam:</strong> Rp ${reservation.cottage?.harga_per_malam ? new Intl.NumberFormat('id-ID').format(reservation.cottage.harga_per_malam) : 'N/A'}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-3">Detail Reservasi</h4>
+                    <div class="space-y-2 text-sm">
+                        <div><strong>Check-in:</strong> ${formatDate(reservation.tanggal_checkin)}</div>
+                        <div><strong>Check-out:</strong> ${formatDate(reservation.tanggal_checkout)}</div>
+                        <div><strong>Durasi:</strong> ${reservation.durasi_menginap} hari</div>
+                        <div><strong>Total Pembayaran:</strong> ${reservation.formatted_total || 'N/A'}</div>
+                        <div><strong>Status:</strong> <span class="px-2 py-1 text-xs rounded-full ${reservation.status_badge_class || 'bg-gray-100'}">${reservation.status_label || 'N/A'}</span></div>
+                        <div><strong>Dibuat pada:</strong> ${formatDate(reservation.created_at)}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-medium text-gray-900 mb-3">Bukti Pembayaran</h4>
+                    <div id="bukti-pembayaran-container">
+                        ${reservation.bukti_pembayaran ?
+                            `<button onclick="openImageInNewTab('${reservation.bukti_pembayaran}')"
+                                    class="w-full bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 hover:border-blue-300 rounded-lg p-6 transition-all duration-200 group">
+                                <div class="flex flex-col items-center space-y-3">
+                                    <div class="w-16 h-16 bg-blue-100 group-hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
+                                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="font-medium text-blue-700">Lihat Bukti Pembayaran</p>
+                                        <p class="text-sm text-blue-600 mt-1">Klik untuk membuka di tab baru</p>
+                                    </div>
+                                    <div class="flex items-center text-sm text-blue-600">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        Buka gambar
+                                    </div>
+                                </div>
+                            </button>` :
+                            `<div class="w-full bg-gray-50 border-2 border-gray-200 rounded-lg p-6 text-center">
+                                <div class="flex flex-col items-center space-y-3">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-500 font-medium">Belum ada bukti pembayaran</p>
+                                    <p class="text-sm text-gray-400">Tamu belum mengunggah bukti pembayaran</p>
+                                </div>
+                            </div>`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('modalContent').innerHTML = modalContent;
+    }
+
+    function handleImageError(img) {
+        console.log('Image failed to load:', img.src);
+        // Coba beberapa alternatif path
+        const originalSrc = img.getAttribute('data-image-url');
+
+        if (originalSrc && !img.dataset.retried) {
+            img.dataset.retried = 'true';
+
+            // Coba alternatif path lain
+            if (originalSrc.includes('/storage/')) {
+                // Coba tanpa /storage/
+                const newSrc = originalSrc.replace('/storage/', '/');
+                console.log('Trying alternative path:', newSrc);
+                img.src = newSrc;
+                return;
+            }
+        }
+
+        // Jika semua gagal, tampilkan placeholder
+        img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkdhbWJhciB0aWRhayBkYXBhdCBkaW11YXQ8L3RleHQ+PC9zdmc+';
+        img.title = 'Gambar tidak dapat dimuat';
+        img.alt = 'Gambar tidak dapat dimuat';
+        img.style.cursor = 'default';
+        img.onclick = null;
+    }
+
+    function openImageInNewTab(imageSrc) {
+        console.log('Attempting to open image:', imageSrc);
+
+        if (!imageSrc || imageSrc.trim() === '') {
+            console.error('Invalid image URL:', imageSrc);
+            alert('URL gambar tidak valid');
+            return;
+        }
+
+        try {
+            // Bersihkan URL
+            let cleanUrl = imageSrc.trim();
+
+            // Pastikan URL memiliki protocol yang benar
+            if (!cleanUrl.startsWith('http') && !cleanUrl.startsWith('/')) {
+                cleanUrl = '/' + cleanUrl;
+            }
+
+            console.log('Opening URL:', cleanUrl);
+
+            // Buka di tab baru
+            const newWindow = window.open(cleanUrl, '_blank', 'noopener,noreferrer');
+
+            if (!newWindow) {
+                console.warn('Popup blocked, trying alternative method');
+                // Alternatif jika popup diblokir
+                const link = document.createElement('a');
+                link.href = cleanUrl;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error('Error opening image:', error);
+            alert('Gagal membuka gambar: ' + error.message);
+        }
+    }
+
+    // Debugging function untuk cek path gambar
+    function debugImagePath(reservationId) {
+        fetch(`/admin/reservasi/${reservationId}`)
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    const reservation = data.data;
-                    document.getElementById('modalContent').innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h4 class="font-medium text-gray-900 mb-3">Informasi Tamu</h4>
-                                <div class="space-y-2 text-sm">
-                                    <div><strong>Nama:</strong> ${reservation.user?.name || 'User tidak ditemukan'}</div>
-                                    <div><strong>Email:</strong> ${reservation.user?.email || 'Email tidak tersedia'}</div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="font-medium text-gray-900 mb-3">Informasi Cottage</h4>
-                                <div class="space-y-2 text-sm">
-                                    <div><strong>Nomor:</strong> ${reservation.cottage.nomor}</div>
-                                    <div><strong>Kapasitas:</strong> ${reservation.cottage.kapasitas} orang</div>
-                                    <div><strong>Harga per malam:</strong> Rp ${new Intl.NumberFormat('id-ID').format(reservation.cottage.harga_per_malam)}</div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="font-medium text-gray-900 mb-3">Detail Reservasi</h4>
-                                <div class="space-y-2 text-sm">
-                                    <div><strong>Check-in:</strong> ${reservation.tanggal_checkin}</div>
-                                    <div><strong>Check-out:</strong> ${reservation.tanggal_checkout}</div>
-                                    <div><strong>Durasi:</strong> ${reservation.durasi_menginap} hari</div>
-                                    <div><strong>Status:</strong> <span class="px-2 py-1 text-xs rounded-full bg-gray-100">${reservation.status_label}</span></div>
-                                    <div><strong>Dibuat pada:</strong> ${reservation.created_at}</div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 class="font-medium text-gray-900 mb-3">Bukti Pembayaran</h4>
-                                ${reservation.bukti_pembayaran ?
-                                    `<img src="/storage/${reservation.bukti_pembayaran}" alt="Bukti Pembayaran" class="w-full h-48 object-cover rounded border">` :
-                                    '<p class="text-gray-500 text-sm">Belum ada bukti pembayaran</p>'
-                                }
-                            </div>
-                        </div>
-                    `;
-
-                    hideLoading();
-                    document.getElementById('detailModal').classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                alert('Gagal memuat detail reservasi');
-                console.error('Error:', error);
+                console.log('Raw bukti_pembayaran from DB:', data.data.bukti_pembayaran);
+                console.log('Full response:', data);
             });
     }
 
@@ -390,19 +561,30 @@
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'X-Requested-With': 'XMLHttpRequest'
             },
+            credentials: 'same-origin',
             body: JSON.stringify({ status: status })
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            console.log('Update status response:', response.status);
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error(`Server returned ${contentType} instead of JSON. Status: ${response.status}`);
             }
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
             return response.json();
         })
         .then(data => {
             hideLoading();
+            console.log('Update status data:', data);
 
             if (data.success) {
                 // Update status badge in the card
@@ -420,8 +602,19 @@
         })
         .catch(error => {
             hideLoading();
-            console.error('Error details:', error);
-            alert('Terjadi kesalahan saat mengubah status: ' + error.message);
+            console.error('Update status error:', error);
+
+            if (error.message.includes('JSON')) {
+                alert('Server mengembalikan response yang tidak valid. Silakan refresh halaman dan coba lagi.');
+            } else if (error.message.includes('HTTP 404')) {
+                alert('Reservasi tidak ditemukan.');
+            } else if (error.message.includes('HTTP 403')) {
+                alert('Anda tidak memiliki izin untuk mengubah status ini.');
+            } else if (error.message.includes('HTTP 500')) {
+                alert('Terjadi kesalahan pada server. Silakan coba lagi nanti.');
+            } else {
+                alert('Terjadi kesalahan saat mengubah status: ' + error.message);
+            }
         });
     }
 
@@ -443,5 +636,7 @@
             closeModal();
         }
     });
+
+
 </script>
 @endpush
