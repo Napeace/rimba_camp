@@ -3,7 +3,7 @@
 @section('title', 'Riwayat Reservasi Cottage - RimbaCamp')
 
 @section('content')
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mt-20 mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold mb-6">Riwayat Reservasi Cottage</h1>
 
         @if ($reservasi->count() > 0)
