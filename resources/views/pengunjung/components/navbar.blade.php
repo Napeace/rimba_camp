@@ -18,7 +18,7 @@
             {{-- Desktop Navigation --}}
             <div class="hidden md:block">
                 <div class="ml-10 flex items-baseline space-x-4">
-                    <a href="/"
+                    <a href="{{ route('pengunjung.dashboard') }}"
                         class="nav-link text-green-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-green-600">
                         <i class="fas fa-home mr-1"></i>
                         Beranda

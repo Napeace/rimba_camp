@@ -10,13 +10,13 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check()) {
+        if (!Auth::guard('admin')->check()) {
             return redirect()->route('admin.login')
                 ->withErrors(['access' => 'Silakan login terlebih dahulu']);
         }
 
-        if (!Auth::user()->isAdmin()) {
-            Auth::logout();
+        if (!Auth::guard('admin')->user()->isAdmin()) {
+            Auth::guard('admin')->logout();
             return redirect()->route('admin.login')
                 ->withErrors(['access' => 'Anda tidak memiliki akses admin']);
         }

@@ -14,7 +14,7 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         // Jika sudah login dan adalah admin, redirect ke dashboard
-        if (Auth::check() && Auth::user()->isAdmin()) {
+        if (Auth::guard('admin')->check() && Auth::guard('admin')->user()->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -42,8 +42,8 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            $user = Auth::user();
+        if (Auth::guard('admin')->attempt($credentials, $request->filled('remember'))) {
+            $user = Auth::guard('admin')->user();
 
             // Cek apakah user adalah admin
             if ($user->isAdmin()) {
@@ -52,7 +52,7 @@ class AuthController extends Controller
                     ->with('success', 'Selamat datang, ' . $user->name);
             } else {
                 // Jika bukan admin, logout dan redirect kembali
-                Auth::logout();
+                Auth::guard('admin')->logout();
                 return redirect()->back()
                     ->withErrors(['email' => 'Anda tidak memiliki akses admin'])
                     ->withInput();
@@ -67,7 +67,7 @@ class AuthController extends Controller
     // Logout admin
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
