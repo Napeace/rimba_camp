@@ -29,8 +29,6 @@ Rimba Camp merupakan destinasi wisata alam dengan potensi besar di bidang ekowis
 - **Laravel** – Framework backend PHP
 - **Tailwind CSS** – Styling modern dan responsif
 - **MySQL** – Database relasional
-- **Google Maps API** – Pemetaan lokasi interaktif
-- **WYSIWYG Editor** – Untuk pengelolaan artikel edukatif
 
 ---
 
