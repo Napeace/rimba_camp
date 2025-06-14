@@ -203,9 +203,9 @@ class CottageController extends Controller
         try {
             // Check if cottage has active reservations when trying to deactivate
             if ($cottage->status === 'aktif') {
-                // PERBAIKAN: Gunakan method relasi 'reservasi' sesuai dengan model
+                // PERBAIKAN: Gunakan method relasi 'reservasi' dan status yang benar
                 $activeReservations = $cottage->reservasi()
-                    ->whereIn('status_reservasi', ['disetujui', 'checked_in'])
+                    ->whereIn('status_reservasi', ['confirmed', 'checked_in'])
                     ->count();
 
                 if ($activeReservations > 0) {
@@ -270,21 +270,78 @@ class CottageController extends Controller
             $request->validate([
                 'checkin' => 'required|date|after_or_equal:today',
                 'checkout' => 'required|date|after:checkin',
+            ], [
+                'checkin.required' => 'Tanggal check-in harus diisi',
+                'checkin.date' => 'Format tanggal check-in tidak valid',
+                'checkin.after_or_equal' => 'Tanggal check-in tidak boleh sebelum hari ini',
+                'checkout.required' => 'Tanggal check-out harus diisi',
+                'checkout.date' => 'Format tanggal check-out tidak valid',
+                'checkout.after' => 'Tanggal check-out harus setelah tanggal check-in',
             ]);
 
-            $isAvailable = $cottage->isAvailable($request->checkin, $request->checkout);
+            // Ambil tanggal dari request
+            $checkinDate = $request->checkin;
+            $checkoutDate = $request->checkout;
+
+            // Log untuk debugging
+            \Log::info('Checking availability for cottage: ' . $cottage->id, [
+                'checkin' => $checkinDate,
+                'checkout' => $checkoutDate,
+                'cottage_status' => $cottage->status,
+                'cottage_number' => $cottage->nomor,
+                'request_method' => $request->method(),
+                'all_reservations' => $cottage->reservasi()->get()->map(function($r) {
+                    return [
+                        'id' => $r->id,
+                        'checkin' => $r->tanggal_checkin,
+                        'checkout' => $r->tanggal_checkout,
+                        'status' => $r->status_reservasi,
+                        'user' => $r->user->name ?? 'Guest'
+                    ];
+                })->toArray()
+            ]);
+
+            // Gunakan method yang sudah diperbaiki
+            $availabilityResult = $cottage->checkAvailabilityWithDetails($checkinDate, $checkoutDate);
+
+            // Log hasil pengecekan
+            \Log::info('Availability check result:', $availabilityResult);
 
             return response()->json([
-                'available' => $isAvailable,
-                'message' => $isAvailable
-                    ? 'Cottage tersedia untuk tanggal tersebut'
-                    : 'Cottage tidak tersedia untuk tanggal tersebut'
+                'available' => $availabilityResult['available'],
+                'message' => $availabilityResult['message'],
+                'conflicting_reservations' => $availabilityResult['conflicting_reservations'],
+                'debug_info' => [
+                    'cottage_id' => $cottage->id,
+                    'cottage_status' => $cottage->status,
+                    'total_reservations' => $cottage->reservasi()->count(),
+                    'active_reservations' => $cottage->reservasi()->whereIn('status_reservasi', [
+                        'pending', 'confirmed', 'checked_in', 'disetujui', 'dikonfirmasi', 'check_in'
+                    ])->count()
+                ]
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error in availability check:', $e->errors());
             return response()->json([
                 'available' => false,
-                'message' => 'Terjadi kesalahan saat mengecek ketersediaan'
+                'message' => 'Data tidak valid: ' . implode(', ', array_flatten($e->errors())),
+                'conflicting_reservations' => [],
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error checking cottage availability:', [
+                'cottage_id' => $cottage->id,
+                'checkin' => $request->checkin ?? 'null',
+                'checkout' => $request->checkout ?? 'null',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'available' => false,
+                'message' => 'Terjadi kesalahan saat mengecek ketersediaan cottage: ' . $e->getMessage(),
+                'conflicting_reservations' => []
             ], 500);
         }
     }

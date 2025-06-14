@@ -4,11 +4,6 @@
 
 @section('body-class', 'bg-gray-50')
 
-@push('styles')
-<meta name="referrer" content="origin">
-<script src="https://cdn.tiny.cloud/1/csopzeiw6d1sm30gdxeha7uo1q0iirqnunhtbrzq2ju82x8m/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-@endpush
-
 @section('content')
 <div class="min-h-screen">
     <!-- Header -->
@@ -121,7 +116,7 @@
                         <textarea id="isi"
                                   name="isi"
                                   rows="15"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('isi') border-red-500 @enderror"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y @error('isi') border-red-500 @enderror"
                                   placeholder="Tulis isi artikel di sini..."
                                   required>{{ old('isi', $artikel->isi) }}</textarea>
                         @error('isi')
@@ -186,23 +181,6 @@
 
 @push('scripts')
 <script>
-// TinyMCE Editor
-tinymce.init({
-    selector: '#isi',
-    height: 400,
-    menubar: false,
-    plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-        'insertdatetime', 'media', 'table', 'help', 'wordcount'
-    ],
-    toolbar: 'undo redo | blocks | ' +
-        'bold italic backcolor | alignleft aligncenter ' +
-        'alignright alignjustify | bullist numlist outdent indent | ' +
-        'removeformat | help',
-    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }'
-});
-
 // Slug Preview
 document.getElementById('judul').addEventListener('input', function(e) {
     const judul = e.target.value;
@@ -213,10 +191,59 @@ document.getElementById('judul').addEventListener('input', function(e) {
     document.getElementById('slug-preview').textContent = slug || '{{ $artikel->slug }}';
 });
 
+// Form submission handler
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitButton = document.querySelector('button[type="submit"]');
+
+    if (form && submitButton) {
+        form.addEventListener('submit', function(e) {
+            // Disable submit button to prevent double submission
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memperbarui...';
+
+            // Basic validation
+            const judul = document.getElementById('judul').value.trim();
+            const isi = document.getElementById('isi').value.trim();
+
+            if (!judul) {
+                e.preventDefault();
+                alert('Judul artikel harus diisi!');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-save"></i> Perbarui Artikel';
+                return false;
+            }
+
+            if (!isi) {
+                e.preventDefault();
+                alert('Isi artikel harus diisi!');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-save"></i> Perbarui Artikel';
+                return false;
+            }
+        });
+    }
+});
+
 // Image Preview
 document.getElementById('gambar').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
+        // Validate file size (2MB = 2048KB)
+        if (file.size > 2048 * 1024) {
+            alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+            this.value = '';
+            return;
+        }
+
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Format gambar tidak didukung! Gunakan JPEG, PNG, JPG, atau GIF.');
+            this.value = '';
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('image-preview').src = e.target.result;
@@ -228,7 +255,9 @@ document.getElementById('gambar').addEventListener('change', function(e) {
 });
 
 // Remove New Image
-document.getElementById('remove-image').addEventListener('click', function() {
+document.getElementById('remove-image').addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     document.getElementById('gambar').value = '';
     document.querySelector('.preview-container').classList.add('hidden');
     document.getElementById('upload-placeholder').classList.remove('hidden');
@@ -251,39 +280,31 @@ document.getElementById('remove-current-image').addEventListener('click', functi
 
 // Drag and Drop
 const dropZone = document.getElementById('upload-zone');
-dropZone.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    dropZone.classList.add('border-blue-500', 'bg-blue-50');
-});
 
-dropZone.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-});
+if (dropZone) {
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('border-blue-500', 'bg-blue-50');
+    });
 
-dropZone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+    });
 
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        document.getElementById('gambar').files = files;
-        document.getElementById('gambar').dispatchEvent(new Event('change'));
-    }
-});
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
 
-// Auto-save draft (optional)
-let autoSaveTimer;
-function autoSave() {
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(() => {
-        // You can implement auto-save functionality here
-        console.log('Auto-saving draft...');
-    }, 30000); // Save every 30 seconds
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const fileInput = document.getElementById('gambar');
+            fileInput.files = files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
 }
 
-// Trigger auto-save on content change
-document.getElementById('judul').addEventListener('input', autoSave);
-tinymce.activeEditor?.on('input', autoSave);
+console.log('Edit artikel form scripts loaded successfully');
 </script>
 @endpush

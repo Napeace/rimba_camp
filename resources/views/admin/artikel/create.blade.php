@@ -4,11 +4,6 @@
 
 @section('body-class', 'bg-gray-50')
 
-@push('styles')
-<meta name="referrer" content="origin">
-<script src="https://cdn.tiny.cloud/1/csopzeiw6d1sm30gdxeha7uo1q0iirqnunhtbrzq2ju82x8m/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-@endpush
-
 @section('content')
 <div class="min-h-screen">
     <!-- Header -->
@@ -97,7 +92,7 @@
                         <textarea id="isi"
                                   name="isi"
                                   rows="15"
-                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('isi') border-red-500 @enderror"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y @error('isi') border-red-500 @enderror"
                                   placeholder="Tulis isi artikel di sini..."
                                   required>{{ old('isi') }}</textarea>
                         @error('isi')
@@ -129,138 +124,110 @@
 
 @push('scripts')
 <script>
-// TinyMCE Editor
-tinymce.init({
-    selector: '#isi',
-    height: 400,
-    menubar: false,
-    plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-        'insertdatetime', 'media', 'table', 'help', 'wordcount'
-    ],
-    toolbar: 'undo redo | blocks | ' +
-        'bold italic backcolor | alignleft aligncenter ' +
-        'alignright alignjustify | bullist numlist outdent indent | ' +
-        'removeformat | help',
-    content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
-    setup: function (editor) {
-        editor.on('change', function () {
-            editor.save();
-        });
-    }
-});
+    // Form submission handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const submitButton = document.querySelector('button[type="submit"]');
 
-// Form submission handler
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const submitButton = document.querySelector('button[type="submit"]');
+        if (form && submitButton) {
+            form.addEventListener('submit', function(e) {
+                // Disable submit button to prevent double submission
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
-    if (form && submitButton) {
-        form.addEventListener('submit', function(e) {
-            // Sync TinyMCE content
-            if (tinymce.get('isi')) {
-                tinymce.get('isi').save();
-            }
+                // Basic validation
+                const judul = document.getElementById('judul').value.trim();
+                const isi = document.getElementById('isi').value.trim();
 
-            // Disable submit button to prevent double submission
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                if (!judul) {
+                    e.preventDefault();
+                    alert('Judul artikel harus diisi!');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan Artikel';
+                    return false;
+                }
 
-            // Basic validation
-            const judul = document.getElementById('judul').value.trim();
-            const isi = tinymce.get('isi') ? tinymce.get('isi').getContent() : document.getElementById('isi').value;
+                if (!isi) {
+                    e.preventDefault();
+                    alert('Isi artikel harus diisi!');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan Artikel';
+                    return false;
+                }
 
-            if (!judul) {
-                e.preventDefault();
-                alert('Judul artikel harus diisi!');
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan Artikel';
-                return false;
-            }
-
-            if (!isi || isi.trim() === '') {
-                e.preventDefault();
-                alert('Isi artikel harus diisi!');
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan Artikel';
-                return false;
-            }
-
-            console.log('Form akan disubmit dengan data:', {
-                judul: judul,
-                isi: isi.substring(0, 100) + '...'
+                console.log('Form akan disubmit dengan data:', {
+                    judul: judul,
+                    isi: isi.substring(0, 100) + '...'
+                });
             });
+        }
+    });
+
+    // Image Preview
+    document.getElementById('gambar').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file size (2MB = 2048KB)
+            if (file.size > 2048 * 1024) {
+                alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                this.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Format gambar tidak didukung! Gunakan JPEG, PNG, JPG, atau GIF.');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('image-preview').src = e.target.result;
+                document.querySelector('.preview-container').classList.remove('hidden');
+                document.getElementById('upload-placeholder').classList.add('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Remove Image
+    document.getElementById('remove-image').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('gambar').value = '';
+        document.querySelector('.preview-container').classList.add('hidden');
+        document.getElementById('upload-placeholder').classList.remove('hidden');
+    });
+
+    // Drag and Drop
+    const dropZone = document.querySelector('.border-dashed');
+
+    if (dropZone) {
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-500', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fileInput = document.getElementById('gambar');
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
         });
     }
-});
 
-// Image Preview
-document.getElementById('gambar').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        // Validate file size (2MB = 2048KB)
-        if (file.size > 2048 * 1024) {
-            alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
-            this.value = '';
-            return;
-        }
-
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-        if (!allowedTypes.includes(file.type)) {
-            alert('Format gambar tidak didukung! Gunakan JPEG, PNG, JPG, atau GIF.');
-            this.value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('image-preview').src = e.target.result;
-            document.querySelector('.preview-container').classList.remove('hidden');
-            document.getElementById('upload-placeholder').classList.add('hidden');
-        }
-        reader.readAsDataURL(file);
-    }
-});
-
-// Remove Image
-document.getElementById('remove-image').addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    document.getElementById('gambar').value = '';
-    document.querySelector('.preview-container').classList.add('hidden');
-    document.getElementById('upload-placeholder').classList.remove('hidden');
-});
-
-// Drag and Drop
-const dropZone = document.querySelector('.border-dashed');
-
-if (dropZone) {
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropZone.classList.add('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            const fileInput = document.getElementById('gambar');
-            fileInput.files = files;
-            fileInput.dispatchEvent(new Event('change'));
-        }
-    });
-}
-
-// Debug: Log semua event handler
-console.log('Artikel form scripts loaded successfully');
+    console.log('Artikel form scripts loaded successfully');
 </script>
 @endpush

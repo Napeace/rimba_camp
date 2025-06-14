@@ -103,7 +103,7 @@
                     </div>
                 </div>
 
-                <!-- Statistics Cards -->
+                <!-- Statistics Cards - BAGIAN YANG DIPERBAIKI -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md p-6 text-white">
                         <div class="flex items-center justify-between">
@@ -121,7 +121,8 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-lg font-semibold">Reservasi Aktif</h3>
-                                <p class="text-3xl font-bold">{{ $cottage->reservasi->where('status_reservasi', 'confirmed')->count() }}</p>
+                                {{-- PERBAIKAN: Gunakan status bahasa Indonesia yang sesuai dengan database --}}
+                                <p class="text-3xl font-bold">{{ $cottage->reservasi->whereIn('status_reservasi', ['menunggu_konfirmasi', 'disetujui'])->count() }}</p>
                             </div>
                             <div class="bg-green-400 p-3 rounded-full">
                                 <i class="fas fa-check-circle text-white text-2xl"></i>
@@ -133,8 +134,9 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h3 class="text-lg font-semibold">Total Pendapatan</h3>
+                                {{-- PERBAIKAN: Hitung pendapatan dari reservasi yang disetujui (karena belum ada status 'completed') --}}
                                 <p class="text-xl font-bold">
-                                    Rp {{ number_format($cottage->reservasi->where('status_reservasi', 'completed')->sum('total_harga'), 0, ',', '.') }}
+                                    Rp {{ number_format($cottage->reservasi->where('status_reservasi', 'disetujui')->sum('total_harga'), 0, ',', '.') }}
                                 </p>
                             </div>
                             <div class="bg-purple-400 p-3 rounded-full">
@@ -282,54 +284,147 @@
 
             // Show loading
             resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = '<div class="text-center text-gray-600"><i class="fas fa-spinner fa-spin mr-2"></i>Mengecek ketersediaan...</div>';
+            resultDiv.innerHTML = '<div class="text-center text-gray-600 p-4"><i class="fas fa-spinner fa-spin mr-2"></i>Mengecek ketersediaan...</div>';
 
-            // Convert form data to URL parameters
+            // Get form values
             const checkin = formData.get('checkin');
             const checkout = formData.get('checkout');
-            const url = `{{ route('admin.cottages.availability', $cottage) }}?checkin=${checkin}&checkout=${checkout}`;
 
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const alertClass = data.available ? 'bg-green-100 border border-green-400 text-green-700' : 'bg-red-100 border border-red-400 text-red-700';
-                const icon = data.available ? 'check-circle' : 'times-circle';
-
+            // Validasi client-side
+            if (!checkin || !checkout) {
                 resultDiv.innerHTML = `
-                    <div class="${alertClass} px-4 py-3 rounded">
-                        <i class="fas fa-${icon} mr-2"></i>
-                        ${data.message}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                            <div>
+                                <strong>Data Tidak Lengkap</strong>
+                                <p class="text-sm mt-1">Silakan pilih tanggal check-in dan check-out</p>
+                            </div>
+                        </div>
                     </div>
                 `;
+                return;
+            }
+
+            if (new Date(checkout) <= new Date(checkin)) {
+                resultDiv.innerHTML = `
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                            <div>
+                                <strong>Tanggal Tidak Valid</strong>
+                                <p class="text-sm mt-1">Tanggal check-out harus setelah tanggal check-in</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // PERBAIKAN: Gunakan POST request dengan CSRF token dan form data
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            fetch(`{{ route('admin.cottages.availability', $cottage) }}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    checkin: checkin,
+                    checkout: checkout
+                })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Availability response:', data); // Debug log
+
+                let resultHtml = '';
+
+                if (data.available) {
+                    // Cottage tersedia
+                    resultHtml = `
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2 text-green-600"></i>
+                                <div>
+                                    <strong>Cottage Tersedia!</strong>
+                                    <p class="text-sm mt-1">${data.message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Cottage tidak tersedia
+                    let conflictInfo = '';
+                    if (data.conflicting_reservations && data.conflicting_reservations.length > 0) {
+                        conflictInfo = '<div class="mt-3 space-y-2"><p class="text-sm font-medium text-red-700">Reservasi yang bentrok:</p>';
+                        data.conflicting_reservations.forEach(reservation => {
+                            conflictInfo += `
+                                <div class="bg-red-50 border border-red-200 rounded p-2 text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium">${reservation.guest}</span>
+                                        <span class="text-xs text-red-600">${reservation.status}</span>
+                                    </div>
+                                    <div class="text-red-600 text-xs mt-1">
+                                        ${reservation.checkin} - ${reservation.checkout}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        conflictInfo += '</div>';
+                    }
+
+                    resultHtml = `
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-start">
+                                <i class="fas fa-times-circle mr-2 text-red-600 mt-0.5"></i>
+                                <div class="flex-1">
+                                    <strong>Cottage Tidak Tersedia</strong>
+                                    <p class="text-sm mt-1">${data.message}</p>
+                                    ${conflictInfo}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Tambahkan debug info jika ada
+                if (data.debug_info) {
+                    resultHtml += `
+                        <div class="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                            <strong>Debug Info:</strong>
+                            Cottage ID: ${data.debug_info.cottage_id},
+                            Status: ${data.debug_info.cottage_status},
+                            Total Reservasi: ${data.debug_info.total_reservations},
+                            Reservasi Aktif: ${data.debug_info.active_reservations}
+                        </div>
+                    `;
+                }
+
+                resultDiv.innerHTML = resultHtml;
             })
             .catch(error => {
+                console.error('Error:', error);
                 resultDiv.innerHTML = `
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Terjadi kesalahan saat mengecek ketersediaan.
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                            <div>
+                                <strong>Terjadi Kesalahan</strong>
+                                <p class="text-sm mt-1">Tidak dapat mengecek ketersediaan cottage. Error: ${error.message}</p>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
-        });
-
-        // Set minimum checkout date based on checkin
-        document.querySelector('input[name="checkin"]').addEventListener('change', function() {
-            const checkinDate = new Date(this.value);
-            const checkoutInput = document.querySelector('input[name="checkout"]');
-
-            checkinDate.setDate(checkinDate.getDate() + 1);
-            checkoutInput.min = checkinDate.toISOString().split('T')[0];
-
-            // Clear checkout if it's before new minimum
-            if (checkoutInput.value && new Date(checkoutInput.value) <= new Date(this.value)) {
-                checkoutInput.value = '';
-            }
         });
     </script>
 </body>

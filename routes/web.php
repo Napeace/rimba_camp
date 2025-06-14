@@ -77,6 +77,10 @@ Route::get('/dashboard-redirect', function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
+    // ---------- Admin Auth (Before Middleware) ----------
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+
     // ---------- Admin Area (Auth Admin) ----------
     Route::middleware(['auth:admin', 'admin'])->group(function () {
 
@@ -92,7 +96,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Cottage Management
         Route::resource('cottages', CottageController::class);
-        Route::get('/cottages/{cottage}/availability', [CottageController::class, 'checkAvailability'])->name('cottages.availability');
+        Route::post('/cottages/{cottage}/availability', [CottageController::class, 'checkAvailability'])->name('cottages.availability');
         Route::get('/cottages-statistics', [CottageController::class, 'statistics'])->name('cottages.statistics');
         Route::patch('/cottages/{cottage}/toggle-status', [CottageController::class, 'toggleStatus'])->name('cottages.toggle-status');
 
