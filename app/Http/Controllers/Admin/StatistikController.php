@@ -38,14 +38,12 @@ class StatistikController extends Controller
 
     private function getWeeklyChartData()
     {
-        // Pastikan hari ini selalu termasuk dengan menggunakan today() sebagai end date
         $today = Carbon::today();
-        $sevenDaysAgo = $today->copy()->subDays(6); // 6 hari yang lalu + hari ini = 7 hari total
+        $sevenDaysAgo = $today->copy()->subDays(6);
 
         $data = [];
         $labels = [];
 
-        // Loop dari 6 hari yang lalu sampai hari ini (inclusive)
         for ($date = $sevenDaysAgo->copy(); $date->lte($today); $date->addDay()) {
             $statistik = Statistik::whereDate('tanggal', $date->format('Y-m-d'))->first();
 
@@ -69,14 +67,12 @@ class StatistikController extends Controller
 
     private function getMonthlyChartData()
     {
-        // Pastikan hari ini selalu termasuk
         $today = Carbon::today();
-        $thirtyDaysAgo = $today->copy()->subDays(29); // 29 hari yang lalu + hari ini = 30 hari total
+        $thirtyDaysAgo = $today->copy()->subDays(29);
 
         $data = [];
         $labels = [];
 
-        // Loop dari 29 hari yang lalu sampai hari ini (inclusive)
         for ($date = $thirtyDaysAgo->copy(); $date->lte($today); $date->addDay()) {
             $statistik = Statistik::whereDate('tanggal', $date->format('Y-m-d'))->first();
 
@@ -86,7 +82,6 @@ class StatistikController extends Controller
             } elseif ($date->isYesterday()) {
                 $labels[] = 'Kemarin';
             } else {
-                // Tampilkan tanggal dengan format yang ringkas
                 $labels[] = $date->format('d M');
             }
 

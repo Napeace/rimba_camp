@@ -92,19 +92,16 @@ class Cottage extends Model
             ];
         }
 
-        // Pastikan format tanggal konsisten menggunakan Carbon
         $checkinDate = Carbon::parse($checkin)->format('Y-m-d');
         $checkoutDate = Carbon::parse($checkout)->format('Y-m-d');
 
-        // Status reservasi yang dianggap aktif/bentrok
-        // PERBAIKAN: Tambahkan semua kemungkinan status yang ada di database
         $activeStatuses = [
             'pending',
             'confirmed',
             'checked_in',
-            'disetujui',     // Tambahan untuk status bahasa Indonesia
-            'dikonfirmasi',  // Tambahan untuk status bahasa Indonesia
-            'check_in'       // Tambahan untuk variasi nama status
+            'disetujui',
+            'dikonfirmasi',
+            'check_in'
         ];
 
         \Log::info('Checking availability', [
@@ -114,13 +111,8 @@ class Cottage extends Model
             'cottage_status' => $this->status
         ]);
 
-        // PERBAIKAN: Logika pengecekan tanggal yang lebih ketat
         $conflictingReservations = $this->reservasi()
             ->where(function ($query) use ($checkinDate, $checkoutDate) {
-                // Reservasi bentrok jika ada overlap dengan periode yang diminta
-                // Overlap terjadi jika:
-                // 1. Checkin yang diminta < checkout reservasi yang ada DAN
-                // 2. Checkout yang diminta > checkin reservasi yang ada
                 $query->whereRaw('DATE(tanggal_checkin) < ?', [$checkoutDate])
                       ->whereRaw('DATE(tanggal_checkout) > ?', [$checkinDate]);
             })
@@ -173,14 +165,13 @@ class Cottage extends Model
         }
     }
 
-    // Method untuk cek ketersediaan cottage (versi sederhana untuk backward compatibility)
+    // Method untuk cek ketersediaan cottage
     public function isAvailable($checkin, $checkout)
     {
         $result = $this->checkAvailabilityWithDetails($checkin, $checkout);
         return $result['available'];
     }
 
-    // Helper method untuk mendapatkan label status yang lebih user-friendly
     private function getStatusLabel($status)
     {
         $statusLabels = [

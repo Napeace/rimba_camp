@@ -26,9 +26,6 @@ class ArtikelController extends Controller
         // Strip semua HTML tags dari konten
         $validated['isi'] = strip_tags($validated['isi']);
 
-        // Atau jika ingin tetap mempertahankan line breaks
-        // $validated['isi'] = $this->stripHtmlButKeepFormatting($validated['isi']);
-
         // Handle file upload
         if ($request->hasFile('gambar')) {
             $validated['gambar'] = $request->file('gambar')->store('artikel', 'public');
@@ -95,7 +92,6 @@ class ArtikelController extends Controller
         return trim($content);
     }
 
-    // ... method lainnya tetap sama
     public function index(Request $request)
     {
         $query = Artikel::with('user')->latest();

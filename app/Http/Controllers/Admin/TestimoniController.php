@@ -33,7 +33,6 @@ class TestimoniController extends Controller
 
         $testimonis = $query->paginate(10);
 
-        // Ambil statistik keseluruhan (tidak terpengaruh filter)
         $totalTestimonis = Testimoni::count();
         $activeTestimonis = Testimoni::where('status', 'aktif')->count();
         $inactiveTestimonis = Testimoni::where('status', 'nonaktif')->count();

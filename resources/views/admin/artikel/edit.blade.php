@@ -74,7 +74,6 @@
 
                         <!-- Upload New Image -->
                         <div class="mt-2 relative" id="upload-zone">
-                            <!-- Input file yang tersembunyi -->
                             <input id="gambar"
                                 name="gambar"
                                 type="file"
@@ -181,130 +180,125 @@
 
 @push('scripts')
 <script>
-// Slug Preview
-document.getElementById('judul').addEventListener('input', function(e) {
-    const judul = e.target.value;
-    const slug = judul.toLowerCase()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '');
-    document.getElementById('slug-preview').textContent = slug || '{{ $artikel->slug }}';
-});
+    // Slug Preview
+    document.getElementById('judul').addEventListener('input', function(e) {
+        const judul = e.target.value;
+        const slug = judul.toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        document.getElementById('slug-preview').textContent = slug || '{{ $artikel->slug }}';
+    });
 
-// Form submission handler
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const submitButton = document.querySelector('button[type="submit"]');
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const submitButton = document.querySelector('button[type="submit"]');
 
-    if (form && submitButton) {
-        form.addEventListener('submit', function(e) {
-            // Disable submit button to prevent double submission
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memperbarui...';
+        if (form && submitButton) {
+            form.addEventListener('submit', function(e) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memperbarui...';
 
-            // Basic validation
-            const judul = document.getElementById('judul').value.trim();
-            const isi = document.getElementById('isi').value.trim();
+                const judul = document.getElementById('judul').value.trim();
+                const isi = document.getElementById('isi').value.trim();
 
-            if (!judul) {
-                e.preventDefault();
-                alert('Judul artikel harus diisi!');
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-save"></i> Perbarui Artikel';
-                return false;
+                if (!judul) {
+                    e.preventDefault();
+                    alert('Judul artikel harus diisi!');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-save"></i> Perbarui Artikel';
+                    return false;
+                }
+
+                if (!isi) {
+                    e.preventDefault();
+                    alert('Isi artikel harus diisi!');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-save"></i> Perbarui Artikel';
+                    return false;
+                }
+            });
+        }
+    });
+
+    // Image Preview
+    document.getElementById('gambar').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2048 * 1024) {
+                alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                this.value = '';
+                return;
             }
 
-            if (!isi) {
-                e.preventDefault();
-                alert('Isi artikel harus diisi!');
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-save"></i> Perbarui Artikel';
-                return false;
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Format gambar tidak didukung! Gunakan JPEG, PNG, JPG, atau GIF.');
+                this.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('image-preview').src = e.target.result;
+                document.querySelector('.preview-container').classList.remove('hidden');
+                document.getElementById('upload-placeholder').classList.add('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Remove New Image
+    document.getElementById('remove-image').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('gambar').value = '';
+        document.querySelector('.preview-container').classList.add('hidden');
+        document.getElementById('upload-placeholder').classList.remove('hidden');
+    });
+
+    // Remove Current Image
+    @if($artikel->gambar)
+    document.getElementById('remove-current-image').addEventListener('click', function() {
+        if (confirm('Hapus gambar saat ini? Gambar akan dihapus setelah artikel disimpan.')) {
+            document.getElementById('current-image').style.display = 'none';
+            // Add hidden input to indicate image should be removed
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'remove_image';
+            input.value = '1';
+            document.querySelector('form').appendChild(input);
+        }
+    });
+    @endif
+
+    // Drag and Drop
+    const dropZone = document.getElementById('upload-zone');
+
+    if (dropZone) {
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('border-blue-500', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fileInput = document.getElementById('gambar');
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
             }
         });
     }
-});
 
-// Image Preview
-document.getElementById('gambar').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        // Validate file size (2MB = 2048KB)
-        if (file.size > 2048 * 1024) {
-            alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
-            this.value = '';
-            return;
-        }
-
-        // Validate file type
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-        if (!allowedTypes.includes(file.type)) {
-            alert('Format gambar tidak didukung! Gunakan JPEG, PNG, JPG, atau GIF.');
-            this.value = '';
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('image-preview').src = e.target.result;
-            document.querySelector('.preview-container').classList.remove('hidden');
-            document.getElementById('upload-placeholder').classList.add('hidden');
-        }
-        reader.readAsDataURL(file);
-    }
-});
-
-// Remove New Image
-document.getElementById('remove-image').addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    document.getElementById('gambar').value = '';
-    document.querySelector('.preview-container').classList.add('hidden');
-    document.getElementById('upload-placeholder').classList.remove('hidden');
-});
-
-// Remove Current Image
-@if($artikel->gambar)
-document.getElementById('remove-current-image').addEventListener('click', function() {
-    if (confirm('Hapus gambar saat ini? Gambar akan dihapus setelah artikel disimpan.')) {
-        document.getElementById('current-image').style.display = 'none';
-        // Add hidden input to indicate image should be removed
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'remove_image';
-        input.value = '1';
-        document.querySelector('form').appendChild(input);
-    }
-});
-@endif
-
-// Drag and Drop
-const dropZone = document.getElementById('upload-zone');
-
-if (dropZone) {
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropZone.classList.add('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-    });
-
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('border-blue-500', 'bg-blue-50');
-
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            const fileInput = document.getElementById('gambar');
-            fileInput.files = files;
-            fileInput.dispatchEvent(new Event('change'));
-        }
-    });
-}
-
-console.log('Edit artikel form scripts loaded successfully');
+    console.log('Edit artikel form scripts loaded successfully');
 </script>
 @endpush

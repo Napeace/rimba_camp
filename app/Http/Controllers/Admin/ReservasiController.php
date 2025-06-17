@@ -78,11 +78,9 @@ class ReservasiController extends Controller
 
             $oldStatus = $reservasi->status_reservasi;
 
-            // Update dengan method yang lebih aman
             $reservasi->status_reservasi = $request->status;
             $reservasi->save();
 
-            // Refresh model untuk mendapatkan data terbaru
             $reservasi->refresh();
 
             return response()->json([
@@ -126,16 +124,12 @@ class ReservasiController extends Controller
     {
         $reservasi->load(['user', 'cottage']);
 
-        // PERBAIKAN: Logika path gambar yang lebih sederhana dan akurat
         $buktiPembayaranUrl = null;
         if ($reservasi->bukti_pembayaran) {
-            // Jika sudah berupa URL lengkap (http/https)
             if (filter_var($reservasi->bukti_pembayaran, FILTER_VALIDATE_URL)) {
                 $buktiPembayaranUrl = $reservasi->bukti_pembayaran;
             }
-            // Jika path relatif, tambahkan /storage/ di depan
             else {
-                // Bersihkan path dari slash di awal jika ada
                 $cleanPath = ltrim($reservasi->bukti_pembayaran, '/');
                 $buktiPembayaranUrl = '/storage/' . $cleanPath;
             }

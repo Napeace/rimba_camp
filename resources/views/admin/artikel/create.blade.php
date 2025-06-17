@@ -50,7 +50,6 @@
                             Gambar Artikel
                         </label>
                         <div class="mt-2 relative">
-                            <!-- Input file yang tersembunyi -->
                             <input id="gambar"
                                 name="gambar"
                                 type="file"
@@ -124,18 +123,15 @@
 
 @push('scripts')
 <script>
-    // Form submission handler
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form');
         const submitButton = document.querySelector('button[type="submit"]');
 
         if (form && submitButton) {
             form.addEventListener('submit', function(e) {
-                // Disable submit button to prevent double submission
                 submitButton.disabled = true;
                 submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
-                // Basic validation
                 const judul = document.getElementById('judul').value.trim();
                 const isi = document.getElementById('isi').value.trim();
 
@@ -167,14 +163,12 @@
     document.getElementById('gambar').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            // Validate file size (2MB = 2048KB)
             if (file.size > 2048 * 1024) {
                 alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
                 this.value = '';
                 return;
             }
 
-            // Validate file type
             const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
             if (!allowedTypes.includes(file.type)) {
                 alert('Format gambar tidak didukung! Gunakan JPEG, PNG, JPG, atau GIF.');

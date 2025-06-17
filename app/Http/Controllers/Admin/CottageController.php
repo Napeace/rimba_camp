@@ -301,7 +301,6 @@ class CottageController extends Controller
                 })->toArray()
             ]);
 
-            // Gunakan method yang sudah diperbaiki
             $availabilityResult = $cottage->checkAvailabilityWithDetails($checkinDate, $checkoutDate);
 
             // Log hasil pengecekan

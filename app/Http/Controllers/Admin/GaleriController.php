@@ -45,7 +45,6 @@ class GaleriController extends Controller
             $file = $request->file('image');
             $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
 
-            // Simpan file ke storage/app/public/galeri
             $file->storeAs('public/galeri', $fileName);
 
             Galeri::create([

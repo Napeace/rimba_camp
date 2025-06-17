@@ -213,7 +213,6 @@
             });
         });
 
-        // Enhanced hover effects
         document.addEventListener('DOMContentLoaded', function() {
             const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
 
